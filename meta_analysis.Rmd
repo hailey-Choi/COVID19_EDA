@@ -1,0 +1,51 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Dataset
+
+* Hydroxychloroquine and chloroquine for survival in COVID-19: an international collaborative meta-analysis of randomized trials
+
+* Data Sources:Mortality  data from  published  and unpublished  RCTs that were systematically  identified  in trial registries, literature databases  and other repositories, including ClinicalTrials.gov,  WHO International  Clinical Trials Registry Platform,  PubMed, and the Cochrane  COVID-19  register  until June 11, 2020. Mortality data from  unpublished trialswill be requested from  trial investigators
+
+* This study will estimate  the effects of hydroxychloroquine  and chloroquine  on survival  across all trials with available  data
+
+
+```{r}
+df <- read.csv("data_meta_hcqcq_update_2020-10-23.csv", sep = ";")
+df
+```
+
+```{r}
+df<-df[df[,"hcq_cq"]=="hcq",]
+df<-df[!(df$hcq_arm_event==0 & df$control_arm_event==0),]
+df
+
+```
+# meta analysis
+
+```{r}
+library(meta)
+
+m.bin <- metabin(hcq_arm_event, hcq_arm_total, control_arm_event, control_arm_total,
+                 data = df,
+                 studlab = paste(acronym),
+                 comb.fixed = T,comb.random = T,
+                 method = 'MH',sm = "RR"
+)
+m.bin
+```
+
+# forest plot
+
+```{r, fig.height=6, fig.width=5}
+
+forest(m.bin, leftcols = "studlab", fontsize=8)
+```
+# funnel plot
+
+```{r}
+funnel(m.bin)
+```
+
